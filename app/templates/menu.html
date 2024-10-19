@@ -1,0 +1,14 @@
+{% extends './index.html' %}
+
+{% block title %} Menu {% endblock %}
+
+{% block body %}
+    <h1>Menú principal</h1>
+
+    <ul>
+        <li><a href="{{ url_for('get_info') }}">Información del dataset</a></li>
+        <li><a href="{{ url_for('get_data') }}">Correlativos</a></li>
+        <li><a href="{{ url_for('images_data') }}">Imágenes generadas</a></li>
+        <li><a href="{{ url_for('analysis_data') }}">Resultados</a></li>
+    </ul>
+{% endblock %}

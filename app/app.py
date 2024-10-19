@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, url_for
+from flask import Flask, render_template, jsonify, url_for, request, redirect, flash
 #----------------------------------------------------------------------------
 import pandas as pd
 import matplotlib
@@ -19,8 +19,11 @@ from sklearn import svm
 from sklearn.metrics import accuracy_score,f1_score,precision_score,recall_score
 from sklearn import metrics
 #----------------------------------------------------------------------------
+app = Flask(__name__)
+
 #Lectura del Dataset de Dropout
 data = pd.read_csv("app/dataset.csv")
+
 #data.head()
 data.rename(columns = {'Nacionality':'Nationality', 'Age at enrollment':'Age'}, inplace = True)
 data.isnull().sum()/len(data)*100
@@ -33,10 +36,9 @@ print(data["Target"].unique())
 data.corr()['Target']
 #----------------------------------------------------------------------------
 
-app = Flask(__name__)
-
 @app.route('/info')
 def get_info():
+
     data_json = []
 
     for i, col in enumerate(data.columns):
@@ -60,6 +62,7 @@ def get_info():
 
 @app.route('/data')
 def get_data():
+    
     data_json = []
 
     #Generación de heatmap
@@ -180,14 +183,15 @@ def analysis_data():
     lr = LogisticRegression(random_state=42)
     knn = KNeighborsClassifier(n_neighbors=3)
     abc = AdaBoostClassifier(n_estimators=50,learning_rate=1, random_state=0)
-    #svm = svm.SVC(kernel='linear', probability=True)
+    sm = svm.SVC(kernel='linear', probability=True)
+
 
     dtree.fit(X_train,y_train)
     rfc.fit(X_train,y_train)
     lr.fit(X_train,y_train)
     knn.fit(X_train,y_train)
     abc.fit(X_train, y_train)
-    #svm.fit(X_train, y_train)
+    sm.fit(X_train, y_train)
 
     models_results = []
     results = {}
@@ -202,7 +206,7 @@ def analysis_data():
         ("Logistic Regression", lr),
         ("K-Nearest Neighbors", knn),
         ("AdaBoost", abc),
-        #("SVM", svm)
+        ("SVM", sm)
     ]
 
     for nombre, modelo in modelos:
@@ -261,7 +265,7 @@ def analysis_data():
         (metrics.confusion_matrix(y_test, y_predicciones.get("Logistic Regression")), "Logistic Regression"),
         (metrics.confusion_matrix(y_test, y_predicciones.get("K-Nearest Neighbors")), "K-Nearest Neighbors"),
         (metrics.confusion_matrix(y_test, y_predicciones.get("AdaBoost")), "AdaBoost"),
-        #(metrics.confusion_matrix(y_test, y_predicciones.get("SVM")), "SVM")
+        (metrics.confusion_matrix(y_test, y_predicciones.get("SVM")), "SVM")
     ]
 
     class_names = ['Dropout', 'Enrolled', 'Graduate']
@@ -289,13 +293,12 @@ def analysis_data():
         'matrix': models_images
     }
 
-    #df_resultados = pd.DataFrame(resultados).T
     print(resultados)
     return render_template('models.html', data = resultados)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('menu.html')
 
 if __name__ == '__main__':
     app.run(debug = True)
