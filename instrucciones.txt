@@ -1,0 +1,19 @@
+Para iniciar el aplicativo, se deben seguir los pasos a continuación
+
+1. Crear un entorno virtual, usando el comando:
+
+    virtualenv -p python3 <nombre del entorno>
+
+Nota: En caso la consola muestra que no se permiten scripts, cambiarlo en PowerShell
+
+2. Activarlo con: 
+    
+    .\env\Scripts\activate
+
+3. Instalar todos los módulos requeridos (requirements.txt)
+
+    pip install -r requirements.txt
+
+4. Ejecutar la aplicación con:
+
+    python .\app\app.py
