@@ -1,80 +1,138 @@
-from src.services.read import data, copy_data
-from src.services.models import models_results
-from src.services.graphics import heatmap, pie_graph, barras_graph, histogram_graph, box_graph, models_metrics, models_matrix
-from flask import Flask, render_template, jsonify, url_for, request, redirect, flash
+import src.services.read as rd
+from src.services.models import models_data
+from src.services.graphics import heatmap, pie_graph, barras_graph, histogram_graph, box_graph
+from flask import Flask, request, render_template, jsonify
+import os
+import pandas as pd
 #--------------------------------------------------------------------------------------------
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='src/templates')
 #--------------------------------------------------------------------------------------------
 
-@app.route('/info')
-def get_info():
-    data_json = []
+#Ruta de archivos subidos
+UPLOAD_FOLDER = os.path.join(app.root_path, 'static')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-    for i, col in enumerate(data.columns):
-        #Obtención de tipos de dato
-        dtype = str(data[col].dtype)
+#Datos para analizar
+data = None
+#--------------------------------------------------------------------------------------------
 
-        data_json.append({
-            'number': i,
-            'column': col,
-            'type': dtype
-        })
+@app.route('/', methods=["GET", "POST"])
+def upload_file():
+    global data
 
-    data_info = {
-        'title': 'Columnas del dataset',
-        'info': data_json,
-        'cantidad': len(data_json)
-    }
+    if request.method == "POST":
+        if 'file' not in request.files:
+            return "No se ha seleccionado ningún archivo"
+        
+        file = request.files['file']
 
-    return jsonify(data_info)
+        if file and file.filename.endswith('.csv'):
+            #Directorio del dataset
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+            print(filepath)
+
+            if not os.path.exists(filepath):
+                file.save(filepath)
+                print(f"Documento {filepath} guardado con éxito")
+            
+            data = rd.process_data(filepath)
+            return data.to_html()
+        else:
+            return "Debe subir un archivo CSV válido"
+
+    return render_template('index.html')
 #--------------------------------------------------------------------------------------------
 
 @app.route('/data')
 def get_data():
     data_json = []
 
-    heatmap(data)
+    if data is not None:
+        heatmap(data)
 
-    for i, col in enumerate(data.columns):
-        data_json.append({
-            'number': i,
-            'column': col,
-            'corr_target': float(data.corr()['Target'][i])
-        })
-    
-    data_results = {
-        'title': 'Correlativos',
-        'info': data_json
-    }
-    
-    return jsonify(data_results)
+        for i, col in enumerate(data.columns):
+            data_json.append({
+                'number': i,
+                'column': col,
+                'type': str(data[col].dtype),
+                'corr_target': float(data.corr()['Target'][i])
+            })
+        
+        data_results = {
+            'title': 'Correlativos',
+            'info': data_json
+        }
+        return jsonify(data_results)
+    else:
+        return "No hay datos para analizar"
 #--------------------------------------------------------------------------------------------
 
 #Generación de gráficos
 @app.route('/graphs')
 def graphs_data():
-    new_data = copy_data(data)
+    if data is not None:
+        new_data = rd.copy_data(data)
 
-    pie_graph(new_data)
-    barras_graph(new_data)
-    histogram_graph(new_data)
-    box_graph(new_data)
+        pie_graph(new_data)
+        barras_graph(new_data)
+        histogram_graph(new_data)
+        box_graph(new_data)
 
-    return "Gráficos creados con éxito"
+        return "Gráficos creados con éxito"
+    else:
+        return "No hay datos para analizar"
 #--------------------------------------------------------------------------------------------
 
 @app.route('/models')
 def analysis_data():
-    #Uso de los modelos de predicción (métricas)
-    models_metrics()
+    if data is not None:
+        #Métricas y gráficos de modelos predictivos
+        m_results = models_data(data)
 
-    #Matrices de confusión
-    models_matrix()
+        return jsonify(m_results['results'])
+    else:
+        return "No hay datos para analizar"
+#--------------------------------------------------------------------------------------------
 
-    m_results = models_results
+@app.route('/predict', methods = ["GET", "POST"])
+def predict_data():
+    if request.method == "POST":
+        if 'file' not in request.files:
+            return "No se ha seleccionado ningún archivo"
+        
+        file = request.files['file']
 
-    return jsonify(m_results)
+        if file and file.filename.endswith('.csv'):
+            #Directorio del dataset
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+            print(filepath)
+
+            if not os.path.exists(filepath):
+                file.save(filepath)
+                print(f"Documento {filepath} guardado con éxito")
+            
+            predictions = pd.read_csv(filepath)
+
+            if data is not None:
+                #Lista de predicciones
+                model_prediction = models_data(data)
+                model_prediction = model_prediction['model'].predict(predictions).tolist()
+                labels = {0: 'Dropout', 1: 'Enrolled', 2: 'Graduate'}
+
+                #Cambio de números por etiquetas
+                final_results = {
+                    'cantidad': len(model_prediction),
+                    'info': [labels[val] for val in model_prediction]
+                }
+
+                return final_results
+            else:
+                return "Faltan datos de entrenamiento"
+        else:
+            return "Debe subir un archivo CSV válido"
+
+    return render_template('predict.html')
 #--------------------------------------------------------------------------------------------
 
 #Ejecución final

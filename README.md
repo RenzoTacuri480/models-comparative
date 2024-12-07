@@ -13,3 +13,5 @@ Activación
 
 Instalación de los paquetes
 ### `pip install -r requirements.txt`
+
+Para el uso de las APIs, usar Postman, ThunderClient (extensión de VSCode) o un navegador de su preferencia.
