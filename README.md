@@ -16,9 +16,3 @@ Instalación de los paquetes: `pip install -r requirements.txt`
 Ejecución: `python app.py`
 
 <em><ins>Dataset</ins>: En la carpeta src/static/ (entrenamiento y test).</em>
-
-<hr>
-
-### Vista ThunderClient
-
-![](./example.png)
