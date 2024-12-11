@@ -5,13 +5,20 @@ Aplicación que compara las métricas obtenidas por modelos de Machine Learning 
 <hr/>
 
 En primer lugar, crear el entorno virtual
-### `python -m virtualenv env`
-### `virtualenv -p python3 env`
+`python -m virtualenv env` o `virtualenv -p python3 env`
 
-Activación
-### `.\env\Scripts\activate`
+Activación: `.\env\Scripts\activate`
 
-Instalación de los paquetes
-### `pip install -r requirements.txt`
+Instalación de los paquetes: `pip install -r requirements.txt`
 
-Para el uso de las APIs, usar Postman, ThunderClient (extensión de VSCode) o un navegador de su preferencia.
+<em><ins>Nota</ins>: Para el uso de las APIs, usar Postman, **ThunderClient** (extensión de VSCode) o un navegador de su preferencia.</em>
+
+Ejecución: `python app.py`
+
+<em><ins>Dataset</ins>: En la carpeta src/static/ (entrenamiento y test).</em>
+
+<hr>
+
+### Vista ThunderClient
+
+![](./example.png)
