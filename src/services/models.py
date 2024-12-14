@@ -30,7 +30,7 @@ def models_data(data):
     rfc = RandomForestClassifier(random_state=2)
     lr = LogisticRegression(random_state=42)
     knn = KNeighborsClassifier(n_neighbors=3)
-    abc = AdaBoostClassifier(n_estimators=50, learning_rate=1, random_state=0)
+    abc = AdaBoostClassifier(n_estimators=50, learning_rate=1, random_state=0, algorithm='SAMME')
     sm = svm.SVC(kernel='linear', probability=True)
 
     #Entrenamiento
