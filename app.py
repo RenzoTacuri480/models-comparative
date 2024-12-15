@@ -2,11 +2,13 @@ import src.services.read as rd
 from src.services.models import models_data
 from src.services.graphics import heatmap, pie_graph, barras_graph, histogram_graph, box_graph
 from flask import Flask, request, render_template, jsonify
+from flask_cors import CORS
 import os
 import pandas as pd
 #--------------------------------------------------------------------------------------------
 
 app = Flask(__name__, template_folder='src/templates')
+CORS(app)
 #--------------------------------------------------------------------------------------------
 
 #Ruta de archivos subidos
@@ -37,11 +39,18 @@ def upload_file():
                 print(f"Documento {filepath} guardado con éxito")
             
             data = rd.process_data(filepath)
-            return data.to_html()
+            #data = pd.read_csv(filepath)
+
+            table_html = data.to_html(classes='table table-bordered table-hover', index=False)
+
+            column_names = data.columns.to_list()
+            #return data.to_html()
+            print(column_names)
+            return render_template('index.html', table_html=table_html, column_names=column_names)
         else:
             return "Debe subir un archivo CSV válido"
 
-    return render_template('index.html')
+    return render_template('index.html', table_html=None, column_names=[])
 #--------------------------------------------------------------------------------------------
 
 @app.route('/data')
