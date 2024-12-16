@@ -4,12 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename ='css/predict.css') }}">
 </head>
 <body>
-    <h1>Predicción de modelo</h1>
-    <form action="/predict" method="POST" enctype="multipart/form-data">
-        <input type="file" id="uploadFile" name="file" accept=".csv">
-        <input type="submit" value="Enviar">
-    </form>
+    <div class="prediction-container">
+        <h1>Expectativas</h1>
+        <div class="result-box">
+            {% if 'Deserción' in results.info %}
+                <p class="result-text" style="color: red;">
+                    El alumno es propenso a <strong>desertar</strong> de su carrera. El modelo predice que este alumno 
+                    <br>
+                    presenta un riesgo alto de deserción académica. Se recomienda intervenir de manera preventiva para
+                    <br>
+                    evitar que abandone sus estudios.
+                </p>
+            {% elif 'Inscrito' in results.info %}
+                <p class="result-text" style="color: green;">
+                    El alumno está <strong>inscrito</strong> y no presenta riesgo inmediato de deserción según el modelo elegido.
+                </p>
+            {% elif 'Graduado' in results.info %}
+                <p class="result-text" style="color: blue;">
+                    El alumno ha <strong>graduado</strong> satisfactoriamente, hay mucho progreso en el desarrollo de su 
+                    <br>
+                    carrera profesional y se visualiza estabilidad. ¡Felicidades!
+                </p>
+            {% else %}
+                <p class="result-text">
+                    No se pudo determinar el estado del alumno.
+                </p>
+            {% endif %}
+        </div>
+    </div>
 </body>
 </html>

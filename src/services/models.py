@@ -17,7 +17,8 @@ from sklearn.metrics import accuracy_score,f1_score,precision_score,recall_score
 from sklearn import metrics
 
 #Entrenamiento y conjunto de datos
-def models_data(data):
+def models_data():
+    data = pd.read_csv("../../static/dataset.csv")
     new_data = rd.copy_data(data)
 
     X = new_data.drop('Target', axis=1)

@@ -1,0 +1,64 @@
+.table-container {
+    width: 100%;
+    max-width: 100%; /* El ancho máximo es el 100% del contenedor */
+    overflow-x: auto; /* Desplazamiento horizontal */
+    margin-top: 20px;
+    padding-top: 90px;
+}
+
+.table {
+    width: 100%; /* Se asegura de que ocupe todo el ancho disponible */
+    table-layout: flex;
+    overflow-x: auto;
+}
+
+.table th, .table td {
+    padding: 8px 12px;
+    text-align: center;
+    font-size: 14px;
+    word-wrap: break-word;
+    border: 1px solid #ddd; /* Borde para las celdas */
+}
+
+.table th {
+    background-color: #067CC3;
+    color: white;
+}
+
+.table td {
+    background-color: #f9f9f9;
+}
+
+.table tr:hover {
+    background-color: #b8cbf1; /* Color de fondo cuando pasa el mouse */
+}
+
+.table tr:hover td{
+    background-color: #b8cbf1; /* Color de fondo cuando pasa el mouse */
+}
+
+#searchInput {
+    width: 100%;
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 25px;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#searchInput:focus {
+    outline: none;
+    border-color: #067CC3;
+    box-shadow: 0 0 5px rgba(98, 0, 234, 0.5);
+}
+
+.search-container {
+    position: fixed;
+    top: 0;
+    left: 5;
+    right: 5;
+    background-color: white;
+    z-index: 10;
+    padding: 10px 0;
+    width: 100%; /* Para que ocupe todo el ancho de la ventana */
+}

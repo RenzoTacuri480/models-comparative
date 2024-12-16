@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estudiantes</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i|Roboto+Mono:300,400,700|Roboto+Slab:300,400,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Add Material CSS, replace Bootstrap CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename ='css/students.css') }}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-2">
+        <div class="search-container">
+            <h1 class="text mt-3">Lista de estudiantes</h1>
+            <input type="text" class="form-control form-control w-auto" id="searchInput" placeholder="Buscar...">
+        </div>
+
+        <div class="table-container">
+            {% if data %}
+                <table class="table table-hover">
+                    <thead class="table-sm">
+                        <tr>
+                            {% for column in data[0].keys() %}
+                                <th scope="col">{{ column }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in data %}
+                        <tr class="clickable-row">
+                            {% for column in row.values() %}
+                                <td>{{ column }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No hay datos para mostrar</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Detalles del Estudiante</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="modalText">
+                    <!-- Aquí se insertarán las columnas y valores -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="predictButton">Predecir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.bundle.min.js"></script>
+    <script>
+        var selectedRowData = {}; // Variable para almacenar los datos de la fila seleccionada
+
+        $(document).ready(function() {
+            $(".clickable-row").click(function() {
+                // Limpiar el contenido del modal antes de insertarlo
+                $("#modalText").empty();
+                
+                // Extraer las celdas de la fila clickeada
+                var rowData = $(this).children("td");
+
+                // Guardar los datos de la fila seleccionada
+                selectedRowData = {}; // Resetear los datos previos
+                var modalContent = "<ul>";
+                rowData.each(function(index, cell) {
+                    var columnName = $("th").eq(index).text(); // Nombre de la columna
+                    var cellValue = $(cell).text(); // Valor de la celda
+                    selectedRowData[columnName] = cellValue; // Guardar en el objeto
+
+                    if (columnName !== 'ID') {
+                        modalContent += "<li><strong>" + columnName + ":</strong> " + cellValue + "</li>";
+                    }
+                });
+                modalContent += "</ul>";
+
+                // Insertar el contenido al modal
+                $("#modalText").html(modalContent);
+
+                // Mostrar el modal
+                $('#exampleModal').modal('show');
+            });
+
+            $("#predictButton").click(function() {
+                var idValue = selectedRowData["ID"];
+
+                // Realizar la petición AJAX
+                $.ajax({
+                    url: '/predict',
+                    method: 'POST',
+                    data: JSON.stringify({ ID: idValue }),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        var cleanResponse = JSON.stringify(response, null, 4).replace(/\\n/g, '').replace(/\\t/g, '').trim();
+                        // Crear una nueva ventana
+                        var newWindow = window.open("", "_blank");
+
+                        // Escribir el JSON en formato bonito dentro de la ventana
+                        newWindow.document.write(`
+                            <html>
+                                <head>
+                                    <title>Resultados</title>
+                                    <style>
+                                        body { font-family: Arial, sans-serif; margin: 20px; }
+                                        pre { background-color: #f4f4f4; padding: 10px; border-radius: 5px; }
+                                        h1 { color: #333333; }
+                                    </style>
+                                </head>
+                                <body>
+                                    <h1>Resultado de la Predicción</h1>
+                                    <pre>${cleanResponse}</pre>
+                                </body>
+                            </html>
+                        `);
+
+                        newWindow.document.close();
+                    },
+                    error: function(error) {
+                        alert("Error al realizar la predicción.");
+                    }
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>
